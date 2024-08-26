@@ -170,21 +170,6 @@ class Parser:
         return node
 
 
-def print_ast(node, level=0):
-    indent = "  " * level
-    if isinstance(node, Num):
-        print(f"{indent}Num({node.value})")
-    elif isinstance(node, BinOp):
-        print(f"{indent}BinOp:")
-        print(f"{indent}  left: ")
-        print_ast(node.left, level + 2)
-        print(f"{indent}  op: {node.op.type}")
-        print(f"{indent}  right: ")
-        print_ast(node.right, level + 2)
-    else:
-        print(f"{indent}Unknown node type: {type(node)}")
-
-
 class Interpreter:
     def __init__(self, parser):
         self.parser = parser
@@ -215,7 +200,31 @@ class Interpreter:
         raise Exception(f"Немає методу visit_{type(node).__name__}")
 
 
-def main():
+def test_interpreter():
+    tests = [
+        ("2 + 3 * 4", 14),
+        ("(2 + 3) * 4", 20),
+        ("7 + 8 / 4", 9),
+        ("10 - 2 * 3", 4),
+        ("(10 - 2) * 3", 24),
+    ]
+
+    for expression, expected in tests:
+        try:
+            lexer = Lexer(expression)
+            parser = Parser(lexer)
+            interpreter = Interpreter(parser)
+            result = interpreter.interpret()
+            assert result == expected, f"Test failed: {expression} = {result}, expected {expected}"
+            print(f"Test passed: {expression} = {result}")
+        except AssertionError as e:
+            print(e)
+        except Exception as e:
+            print(f"Test failed for expression: {expression}, error: {str(e)}")
+
+
+if __name__ == "__main__":
+    # Основна програма
     while True:
         try:
             text = input('Введіть вираз (або "exit" для виходу): ')
@@ -230,6 +239,5 @@ def main():
         except Exception as e:
             print(e)
 
-
-if __name__ == "__main__":
-    main()
+    # Запуск тестів
+    test_interpreter()
